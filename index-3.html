@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>İzmirAdvisor Sohbet</title>
+  <style>
+    body {
+      background-color: white;
+      color: black;
+      font-family: Arial, sans-serif;
+    }
+    #chatbox {
+      width: 100%;
+      max-width: 400px;
+      margin: auto;
+      margin-top: 50px;
+      background: white;
+      border: 2px solid black;
+      border-radius: 12px;
+      box-shadow: none;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    #messages {
+      height: 400px;
+      overflow-y: scroll;
+      padding: 15px;
+      border-top: 1px solid black;
+      border-bottom: 1px solid black;
+    }
+    .message {
+      margin: 10px 0;
+    }
+    .user {
+      text-align: right;
+      color: black;
+      font-weight: bold;
+    }
+    .bot {
+      text-align: left;
+      color: gray;
+    }
+    #input {
+      display: flex;
+      border-top: 1px solid black;
+    }
+    #input input {
+      flex: 1;
+      padding: 10px;
+      border: none;
+      border-right: 1px solid black;
+      font-size: 16px;
+    }
+    #input button {
+      padding: 10px 15px;
+      background: black;
+      color: white;
+      border: none;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    button {
+      margin: 0 5px;
+      padding: 6px 12px;
+      background: black;
+      color: white;
+      border: none;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+  </style>
+</head>
+<body>
+  <div id="chatbox">
+    <div style="padding: 10px; text-align: center; background: black; color: white; font-weight: bold; font-size: 18px;">
+      IZMIR ADVISOR AI
+    </div>
+    <div style="padding: 10px; text-align: center; background: white; border-bottom: 1px solid black;">
+      <button onclick="setLanguage('tr')">TÜRKÇE</button>
+      <button onclick="setLanguage('en')">ENGLISH</button>
+    </div>
+    <div id="messages"></div>
+    <div id="input">
+      <input type="text" id="userInput" placeholder="Yazın / Type here...">
+      <button onclick="sendMessage()">Gönder</button>
+    </div>
+  </div>
+  <script>
+    const messages = document.getElementById('messages');
+    const userInput = document.getElementById('userInput');
+    let selectedLang = 'auto';
+
+    function setLanguage(lang) {
+      selectedLang = lang;
+      appendMessage('bot', lang === 'tr' ? "Diliniz Türkçe olarak ayarlandı." : "Language set to English.");
+    }
+
+    function appendMessage(sender, text) {
+      const msg = document.createElement('div');
+      msg.className = `message ${sender}`;
+      msg.textContent = text;
+      messages.appendChild(msg);
+      messages.scrollTop = messages.scrollHeight;
+    }
+
+    function detectLanguage(text) {
+      if (selectedLang !== 'auto') return selectedLang;
+      const turkishKeywords = ['ev', 'izmir', 'oturum', 'daire', 'kira', 'satılık', 'merhaba'];
+      const englishKeywords = ['house', 'permit', 'residence', 'hello', 'flat', 'rent', 'sale'];
+      const lower = text.toLowerCase();
+      const isTurkish = turkishKeywords.some(word => lower.includes(word));
+      const isEnglish = englishKeywords.some(word => lower.includes(word));
+      if (isTurkish && !isEnglish) return 'tr';
+      if (isEnglish && !isTurkish) return 'en';
+      return 'unknown';
+    }
+
+    function fetchBotResponse(message) {
+      const lang = detectLanguage(message);
+      const lower = message.toLowerCase();
+
+      if (lang === 'tr') {
+        if (lower.includes('ev') || lower.includes('daire')) {
+          return "Size İzmir'deki en iyi gayrimenkul seçeneklerini sunabilirim!";
+        } else if (lower.includes('oturum')) {
+          return "İzmir'de oturum izni işlemleriyle ilgili size yardımcı olabilirim.";
+        } else if (lower.includes('merhaba')) {
+          return "Merhaba! Size nasıl yardımcı olabilirim?";
+        } else {
+          return "Bu konuda emin değilim ama birlikte kontrol edebiliriz.";
+        }
+      } else if (lang === 'en') {
+        if (lower.includes('house') || lower.includes('flat')) {
+          return "I can help you find the best real estate options in İzmir!";
+        } else if (lower.includes('permit') || lower.includes('residence')) {
+          return "I can assist you with residence permit procedures in İzmir.";
+        } else if (lower.includes('hello')) {
+          return "Hello! How can I assist you?";
+        } else {
+          return "I'm not sure about that, but we can check together!";
+        }
+      } else {
+        return "Lütfen mesajınızı Türkçe veya İngilizce olarak yazın. / Please write your message in Turkish or English.";
+      }
+    }
+
+    function sendMessage() {
+      const text = userInput.value.trim();
+      if (!text) return;
+      appendMessage('user', text);
+      userInput.value = '';
+      setTimeout(() => {
+        const reply = fetchBotResponse(text);
+        appendMessage('bot', reply);
+      }, 500);
+    }
+  </script>
+</body>
+</html>
